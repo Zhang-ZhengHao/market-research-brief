@@ -49,7 +49,7 @@ Python 3.10+：
 
 ## 测试与质量门槛
 
-    pytest -q tests
+    PYTHONPATH=. python -m pytest -q tests
     python -m compileall -q app.py services tests
 
 发布前应在干净的 Python 环境中重复运行这两项检查。
