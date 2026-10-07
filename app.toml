@@ -1,4 +1,4 @@
-name = "Insight Monitor"
+name = "Market Research Brief (Insight Monitor)"
 # Product restart marker: the platform reloads the managed app when this manifest changes.
 start = "bash start.sh"
 health = "/"

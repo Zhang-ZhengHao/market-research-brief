@@ -1,61 +1,110 @@
-# 竞品研究与行业周报助手 · Insight Monitor
+# Market Research Brief (Insight Monitor)
 
-把少量公开资料整理成一份可复核、可交付的研究项目。它适合小企业运营、内容团队、市场顾问和产品经理做竞品速览、行业周报或内容选题预研。
+**English** | [简体中文](README.zh-CN.md)
 
-> 这是一个可现场演示的公开案例，不是事实核验服务，也不承诺经营结果。示例资料全部为合成内容。
+A small Streamlit application that turns a limited set of user-supplied sources into a reviewable research brief. It is designed as a portfolio demonstration for competitor snapshots, industry updates, and content research—not as an autonomous crawler or a fact-checking service.
 
-![Insight Monitor 操作页](screenshots/overview.png)
+![Market Research Brief interface](screenshots/overview.png)
 
-## 五分钟演示
+## Features
 
-1. 选择「竞品速览」「行业周报」或「内容选题」模板。
-2. 载入合成示例，或粘贴最多 5 份正文；也可以填写最多 5 个公开 http/https 地址。
-3. 生成报告，逐份查看标题、日期线索、读取状态和连续原文证据片段。
-4. 下载 Markdown、JSON，或下载一个包含 project.json 与 report.md 的研究项目包。
+- Uses one of three source modes: clearly labelled synthetic examples, up to five public web pages, or up to five pasted documents.
+- Generates a deterministic report by default, with an executive summary, comparison points, changes, suggested actions, and source-level status.
+- Keeps each successful source aligned with its title, URL when supplied, date hint, summary, and a bounded verbatim evidence excerpt.
+- Exports the report as Markdown or JSON, or as a ZIP research package containing `project.json` and `report.md`.
+- Offers an optional OpenAI-compatible summarization path that is disabled unless both a feature flag and a server-side API key are configured.
+- Falls back to the deterministic report when the optional model request fails.
 
-研究项目只在当前浏览器会话中生成，不建立账号、服务端历史数据库或定时任务。导出的项目元数据方便交付给客户或继续人工复核。
+The application does not search the web, sign in to websites, bypass paywalls, schedule jobs, send messages, or maintain a server-side research history.
 
-## 能力边界
+## Evidence and traceability
 
-- 只处理用户主动提供的公开 URL 或粘贴正文；不会自动搜索全网、登录、绕过付费墙、抓取社交平台或自动发送消息。
-- URL 在连接前做 scheme、凭据、DNS 和地址分类检查；回环、私网、链路本地、保留和多播地址会被拒绝，重定向逐跳复验。
-- 每个网页响应默认最多读取 2 MB；连接超时、总处理时间、重定向次数和资料数量都有上限。
-- 原文证据片段来自本地提取到的连续文本；模型不能替失败来源补写证据。
-- 报告中的判断仍需打开来源原文人工核对，尤其是数字、日期、引述和商业结论。
+The report is grounded in the material supplied during the current session:
 
-## 真实 AI（默认关闭）
+- For a public page, the application retains the normalized source URL and an excerpt copied directly from the extracted page text.
+- For pasted material, the pasted text is the analyzed source. An optional URL is retained only as a reference link.
+- A failed source is marked as unread and receives no generated evidence excerpt.
+- Built-in demo sources are synthetic and explicitly labelled; they are not presented as current market facts.
 
-默认使用无需密钥的规则汇总，适合公开演示。真实 AI 必须由部署者显式打开，并同时配置模型密钥。
+Repository evidence for these behaviors is available in:
 
-    export INSIGHT_MONITOR_AI_ENABLED=1
-    export OPENAI_API_KEY="替换为你的密钥"
-    export OPENAI_BASE_URL="https://api.openai.com/v1"  # 可选
-    export OPENAI_MODEL="gpt-4o-mini"                    # 可选
+| Claim | Implementation or test evidence |
+| --- | --- |
+| Source limits and pasted-source ordering | `services/sources.py`, `tests/test_sources.py` |
+| Public URL validation and redirect checks | `services/urls.py`, `services/fetcher.py`, `tests/test_urls.py`, `tests/test_productization.py` |
+| Verbatim evidence excerpts and failed-source handling | `services/report.py`, `tests/test_report.py` |
+| Model source-index alignment and safe fallback | `services/model_client.py`, `tests/test_model_client.py` |
+| Markdown, JSON, and ZIP exports | `services/export.py`, `tests/test_export.py` |
+| Five-source synthetic calibration case | `docs/calibration/2026-09-22-pet-supplies-competitor-case.md` |
 
-每次 AI 汇总最多处理 5 份资料、合计 40,000 字符。开启前请确认模型服务的费用、数据留存和跨境合规政策；页面不会展示或保存密钥。
+These checks establish source alignment and application behavior; they do not establish that a source is authoritative or that a generated conclusion is factually correct.
 
-## 本地运行
+## Technology stack
 
-Python 3.10+：
+- Python 3.10+
+- Streamlit 1.64.0
+- Python standard-library HTTP, HTML parsing, IP address, JSON, and ZIP modules
+- pytest 8.x for automated tests
+- Optional OpenAI-compatible Chat Completions endpoint, called without an additional SDK
 
-    python -m venv .venv
-    . .venv/bin/activate              # Windows 可使用 .venv/Scripts/activate
-    pip install -r requirements-dev.txt
-    streamlit run app.py
+## Quick start
 
-平台托管使用 start.sh：它从 PORT 环境变量读取端口并绑定 0.0.0.0。正式产品清单见 app.toml。
+From the repository root:
 
-## 测试与质量门槛
+```bash
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -r requirements-dev.txt
+python -m streamlit run app.py
+```
 
-    pytest -q tests
-    python -m compileall -q app.py services tests
+On Windows PowerShell, activate the environment with `.venv\Scripts\Activate.ps1`.
 
-发布前应在干净的 Python 环境中重复运行这两项检查。
+The managed start script requires a port and binds to all interfaces:
 
-## 交付边界
+```bash
+PORT=8501 bash start.sh
+```
 
-这个案例适合按模块报价：资料清洗、模板定制、报告字段调整和导出格式扩展。它不包含真实店铺凭证、多租户权限、支付、消息推送、服务端历史数据库或事实核验承诺。客户提供真实资料前，应先完成脱敏并确认外部模型政策。
+Only expose that development-style process on a trusted host. A production deployment should place it behind an authenticated, TLS-terminating reverse proxy and appropriate network controls.
+
+### Optional model mode
+
+Deterministic mode requires no API key. To allow a user to select the optional model path, configure the server process explicitly:
+
+```bash
+export INSIGHT_MONITOR_AI_ENABLED=1
+export OPENAI_API_KEY="replace-with-a-server-side-key"
+export OPENAI_BASE_URL="https://api.openai.com/v1"  # optional
+export OPENAI_MODEL="gpt-4o-mini"                    # optional
+```
+
+Do not commit credentials. When model mode is used, successful source text is sent to the configured provider; review its cost, retention, residency, and cross-border data policies first.
+
+## Tests
+
+The verification workflow runs on Python 3.10 and 3.12. The same checks can be run locally after installing `requirements-dev.txt`:
+
+```bash
+PYTHONPATH=. python -m pytest -q tests
+python -m compileall -q app.py services tests
+python -m pip check
+```
+
+## URL and network security boundary
+
+The public-page path accepts only HTTP and HTTPS URLs. It rejects embedded credentials and hosts or resolved addresses classified as local, private, loopback, link-local, reserved, multicast, or unspecified. DNS and destination checks are repeated before each redirect hop. Fetching is also bounded to five URLs, four redirects, a 2 MB response, a 12-second connection timeout, a 20-second overall timeout, HTML content, and 12,000 extracted characters per source.
+
+These are application-level safeguards, not a hardened network sandbox. They do not replace deployment-level egress rules, metadata-service blocking, DNS controls, proxy policy, rate limiting, or abuse monitoring. Deployments handling untrusted users should enforce those controls outside the process as well.
+
+Default deterministic mode makes no model request. Public-page mode still connects to the URLs supplied by the user. If optional model mode is enabled, the application can send at most five sources and 40,000 source characters to the configured OpenAI-compatible endpoint.
+
+## Production boundary
+
+This repository is a customer-demo and portfolio implementation. It does not include authentication or authorization, tenant isolation, persistent storage, audit logs, background jobs, quotas, billing, high availability, backups, production observability, or a factual-accuracy guarantee. Session results exist only in the active Streamlit session unless the user downloads them.
+
+Before using it with customer data, add the controls appropriate to the deployment, obtain permission to process the material, remove sensitive data, and require a person to verify dates, numbers, quotations, and business conclusions against the original sources.
 
 ## License
 
-本项目采用 MIT License，见 LICENSE。第三方依赖与归属见 THIRD_PARTY_NOTICES.md，安全问题请按 SECURITY.md 联系。
+Released under the MIT License. See [LICENSE](LICENSE), [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), and [SECURITY.md](SECURITY.md).

@@ -4,6 +4,20 @@ from streamlit.testing.v1 import AppTest
 from services.demo_data import DEMO_DOCUMENTS, DEMO_TOPIC
 
 
+def test_product_title_matches_repository_manifest():
+    root = Path(__file__).parents[1]
+    app = AppTest.from_file(root / "app.py").run()
+
+    assert not app.exception
+    assert any(
+        "Market Research Brief" in item.value and "(Insight Monitor)" in item.value
+        for item in app.markdown
+    )
+    assert 'name = "Market Research Brief (Insight Monitor)"' in (
+        root / "app.toml"
+    ).read_text(encoding="utf-8")
+
+
 def test_demo_entry_is_generic_and_not_football(monkeypatch):
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     app = AppTest.from_file(Path(__file__).parents[1] / "app.py").run()

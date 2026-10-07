@@ -3,6 +3,11 @@ __pycache__/
 .pytest_cache/
 .streamlit/secrets.toml
 .env
+.env.*
+!.env.example
+customer-data/
+private-data/
+exports/
 pydeps/
 .install.lock
 .webtest/

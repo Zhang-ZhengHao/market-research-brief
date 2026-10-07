@@ -122,7 +122,7 @@ def _render_report(report, *, template_key: str = "") -> None:
 
 
 st.set_page_config(
-    page_title="Insight Monitor",
+    page_title="Market Research Brief (Insight Monitor)",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
@@ -160,7 +160,7 @@ st.markdown(
 st.markdown(
     f"""
     <section class="hero">
-      <h1>Insight Monitor</h1>
+      <h1>Market Research Brief <span style="white-space: nowrap;">(Insight Monitor)</span></h1>
       <p>把几个公开来源整理成一份带出处的研究简报。适合竞品速览、行业调研和内容选题。</p>
     </section>
     """,
