@@ -5,6 +5,9 @@ from __future__ import annotations
 import os
 
 
+APP_VERSION = "0.1.0"
+
+
 def normalize_build_sha(value: object) -> str:
     text = str(value or "").strip()
     return text[:12] if text else "dev"

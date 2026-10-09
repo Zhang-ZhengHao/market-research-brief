@@ -8,6 +8,21 @@ from services.models import SourceDocument
 from services.report import build_report
 
 
+def test_model_prompt_sends_title_and_text_but_not_inert_reference_link():
+    document = SourceDocument(
+        url="https://reference.example/private-token?value=secret",
+        title="用户资料",
+        text="允许发送给已配置模型的正文。",
+        source_kind="pasted",
+    )
+
+    prompt = OpenAICompatibleReportClient._prompt("测试主题", "研究简报", [document])
+
+    assert "用户资料" in prompt
+    assert "允许发送给已配置模型的正文" in prompt
+    assert document.url not in prompt
+
+
 def test_ai_report_uses_local_source_evidence_instead_of_model_supplied_quote():
     document = SourceDocument(
         url="",
@@ -124,7 +139,7 @@ def test_fake_openai_endpoint_accepts_fenced_json_and_string_source_indexes(monk
 def test_ai_response_cannot_invent_a_summary_for_a_failed_source():
     documents = [
         SourceDocument("https://example.com/a", "来源 A", "成功正文。"),
-        SourceDocument("https://example.com/b", "来源 B", "", status="error", error="抓取失败"),
+        SourceDocument("https://example.com/b", "来源 B", "", status="error", error="资料不可用"),
     ]
     report = OpenAICompatibleReportClient._to_report(
         "测试主题",
@@ -140,7 +155,7 @@ def test_ai_response_cannot_invent_a_summary_for_a_failed_source():
 
     assert report.sources[0].summary == "真实摘要"
     assert report.sources[1].summary == ""
-    assert report.sources[1].error == "抓取失败"
+    assert report.sources[1].error == "资料不可用"
 
 
 @contextmanager
@@ -190,7 +205,7 @@ def test_local_openai_compatible_server_keeps_source_indexes_and_excludes_failed
     body = json.dumps({"choices": [{"message": {"content": content}}]}, ensure_ascii=False).encode()
     documents = [
         SourceDocument("https://example.com/a", "来源 A", "A 的私有测试正文。"),
-        SourceDocument("https://example.com/b", "来源 B", "B 不应发送。", status="error", error="抓取失败"),
+        SourceDocument("https://example.com/b", "来源 B", "B 不应发送。", status="error", error="资料不可用"),
         SourceDocument("https://example.com/c", "来源 C", "C 的私有测试正文。"),
     ]
 
@@ -202,7 +217,7 @@ def test_local_openai_compatible_server_keeps_source_indexes_and_excludes_failed
     assert report.executive_summary == ["三源摘要"]
     assert report.sources[0].summary == "A 摘要"
     assert report.sources[1].summary == ""
-    assert report.sources[1].error == "抓取失败"
+    assert report.sources[1].error == "资料不可用"
     assert report.sources[2].summary == "C 摘要"
     assert len(requests) == 1
     assert requests[0]["path"] == "/v1/chat/completions"

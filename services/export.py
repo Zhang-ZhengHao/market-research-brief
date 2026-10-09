@@ -44,14 +44,14 @@ def report_to_markdown(report: Report) -> str:
 
     lines.extend(["", "## 来源明细", ""])
     for index, source in enumerate(report.sources, start=1):
-        status = "成功" if source.status == "success" else "未读取"
-        source_kind = {"pasted": "用户粘贴", "demo": "演示资料", "web": "公开网页"}.get(
+        status = "已载入" if source.status == "success" else "不可用"
+        source_kind = {"pasted": "用户粘贴", "demo": "合成示例"}.get(
             source.source_kind, source.source_kind
         )
         link_line = (
-            f"- 链接：{source.url}"
+            f"- 参考链接（用户提供，应用未抓取或验证）：{source.url}"
             if source.url
-            else "- 链接：未提供（手工粘贴资料）"
+            else "- 参考链接：未提供（手工粘贴资料）"
         )
         evidence = " ".join((source.evidence or "").splitlines())
         lines.extend(

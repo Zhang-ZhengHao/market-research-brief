@@ -7,7 +7,7 @@ from dataclasses import dataclass, field
 
 @dataclass(frozen=True)
 class SourceDocument:
-    """A fetched (or failed) public source."""
+    """User-supplied source text and optional inert reference metadata."""
 
     url: str
     title: str = ""
@@ -15,7 +15,7 @@ class SourceDocument:
     date_hint: str = ""
     status: str = "success"
     error: str = ""
-    source_kind: str = "web"
+    source_kind: str = "pasted"
 
 
 @dataclass(frozen=True)
@@ -26,7 +26,7 @@ class SourceSummary:
     date_hint: str = ""
     status: str = "success"
     error: str = ""
-    source_kind: str = "web"
+    source_kind: str = "pasted"
     evidence: str = ""
 
 

@@ -5,7 +5,7 @@ from services.export import report_to_json, report_to_markdown
 from services.report import build_report
 
 
-def test_exports_are_readable_and_keep_citation_urls():
+def test_exports_keep_unverified_reference_links_with_an_explicit_label():
     report = build_report(
         "宠物用品竞品",
         "内容选题",
@@ -18,9 +18,10 @@ def test_exports_are_readable_and_keep_citation_urls():
 
     assert "宠物用品竞品" in markdown
     assert "https://example.com/a" in markdown
+    assert "参考链接（用户提供，应用未抓取或验证）" in markdown
     assert payload["sources"][0]["url"] == "https://example.com/a"
     assert payload["angle"] == "内容选题"
-    assert payload["sources"][0]["source_kind"] == "web"
+    assert payload["sources"][0]["source_kind"] == "pasted"
     assert payload["sources"][0]["evidence"]
     assert "原文证据片段" in markdown
     assert payload["sources"][0]["evidence"] in markdown

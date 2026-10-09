@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from collections.abc import Mapping, Sequence
 
-from .extractor import MAX_TEXT_CHARS
 from .models import SourceDocument
-from .urls import validate_urls
+from .reference_links import normalize_reference_link
 
 
+MAX_TEXT_CHARS = 12_000
 MAX_PASTED_SOURCES = 5
 MAX_TOTAL_PASTED_CHARS = 40_000
 
@@ -22,10 +22,7 @@ def build_pasted_source(title: str, url: str, text: str) -> SourceDocument:
         raise ValueError(f"正文过长（{len(cleaned_text)} 字符），最多支持 {MAX_TEXT_CHARS} 字符。")
     cleaned_url = str(url or "").strip()
     if cleaned_url:
-        validation = validate_urls([cleaned_url], max_urls=1)
-        if validation.errors or not validation.urls:
-            raise ValueError(validation.errors[0] if validation.errors else "来源链接无法识别。")
-        cleaned_url = validation.urls[0]
+        cleaned_url = normalize_reference_link(cleaned_url)
     return SourceDocument(
         url=cleaned_url,
         title=str(title or "").strip() or "手工粘贴资料",

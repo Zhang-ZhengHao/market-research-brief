@@ -7,7 +7,7 @@ class _FailingModelClient:
         raise RuntimeError("fake model outage")
 
 
-def test_build_report_preserves_sources_and_separates_failed_pages():
+def test_build_report_preserves_sources_and_separates_unavailable_material():
     documents = [
         SourceDocument(
             url="https://example.com/a",
@@ -20,7 +20,7 @@ def test_build_report_preserves_sources_and_separates_failed_pages():
             title="来源 B",
             text="",
             status="error",
-            error="抓取超时",
+            error="资料不可用",
         ),
     ]
 
@@ -30,7 +30,7 @@ def test_build_report_preserves_sources_and_separates_failed_pages():
     assert len(report.sources) == 2
     assert report.sources[0].summary
     assert report.sources[1].status == "error"
-    assert any("抓取超时" in warning for warning in report.warnings)
+    assert any("资料不可用" in warning for warning in report.warnings)
     assert report.executive_summary
     assert report.actions
     assert report.sources[0].evidence
@@ -61,3 +61,11 @@ def test_ai_failure_marks_report_as_rule_fallback_instead_of_real_ai():
 
     assert report.mode == "演示规则（AI失败回退）"
     assert any("已回退规则结果" in warning for warning in report.warnings)
+
+
+def test_empty_report_only_guides_the_user_to_paste_source_text():
+    report = build_report("测试主题", "研究简报", [])
+
+    guidance = " ".join([*report.executive_summary, *report.actions])
+    assert "粘贴" in guidance
+    assert "公开地址" not in guidance

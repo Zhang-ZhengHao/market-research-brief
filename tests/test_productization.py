@@ -1,198 +1,40 @@
 import io
 import json
-import socket
+from pathlib import Path
 import zipfile
 
 import pytest
 
 from services.demo_data import DEMO_DOCUMENTS
 import services.export as export_service
-from services.fetcher import fetch_document
 from services.model_client import ModelClientError, OpenAICompatibleReportClient
 from services.models import SourceDocument
 from services.report import build_report
 import services.demo_data as demo_data
-from services.urls import validate_urls
 
 
-class _Response:
-    def __init__(self, body=b"", *, status=200, location="", content_type="text/html"):
-        self.body = body
-        self.status = status
-        self.code = status
-        self.headers = {"Content-Type": content_type}
-        if location:
-            self.headers["Location"] = location
+def test_source_ingestion_tree_has_no_page_fetch_runtime():
+    root = Path(__file__).parents[1]
 
-    def read(self, size=-1):
-        return self.body if size < 0 else self.body[:size]
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self, *_args):
-        return False
+    assert not (root / "services" / "fetcher.py").exists()
+    assert not (root / "services" / "urls.py").exists()
+    assert not (root / "services" / "extractor.py").exists()
+    for path in [root / "app.py", *(root / "services").glob("*.py")]:
+        if path.name == "model_client.py":
+            continue
+        source = path.read_text(encoding="utf-8")
+        assert "urllib.request" not in source
+        assert "socket.getaddrinfo" not in source
 
 
-def _resolver(mapping):
-    def resolve(host, port, *args, **kwargs):
-        value = mapping[host]
-        return [(socket.AF_INET, socket.SOCK_STREAM, socket.IPPROTO_TCP, "", (value, port))]
+def test_synthetic_demo_sources_do_not_offer_placeholder_external_links():
+    template_documents = [
+        document
+        for template in demo_data.RESEARCH_TEMPLATES
+        for document in template.documents
+    ]
 
-    return resolve
-
-
-def test_fetch_rechecks_dns_before_following_redirect_to_private_address():
-    calls = []
-
-    def opener(request, timeout):
-        calls.append(request.full_url)
-        return _Response(status=302, location="https://redirect.test/private")
-
-    document = fetch_document(
-        "https://public.test/start",
-        opener=opener,
-        resolver=_resolver({"public.test": "93.184.216.34", "redirect.test": "127.0.0.1"}),
-    )
-
-    assert document.status == "error"
-    assert "内网" in document.error or "回环" in document.error
-    assert calls == ["https://public.test/start"]
-
-
-def test_fetch_rejects_dns_resolving_to_link_local_or_reserved_address():
-    for address in ("169.254.169.254", "240.0.0.1"):
-        document = fetch_document(
-            "https://public.test/metadata",
-            opener=lambda *_args, **_kwargs: _Response(b"<p>should not read</p>"),
-            resolver=_resolver({"public.test": address}),
-        )
-        assert document.status == "error"
-        assert "地址" in document.error or "内网" in document.error
-
-
-def test_fetch_rejects_response_declaring_more_than_maximum_bytes_before_reading():
-    class DeclaredLarge(_Response):
-        def __init__(self):
-            super().__init__(b"<p>small body</p>")
-            self.headers["Content-Length"] = "1001"
-
-    reads = []
-
-    class Tracked(DeclaredLarge):
-        def read(self, size=-1):
-            reads.append(size)
-            return super().read(size)
-
-    document = fetch_document(
-        "https://public.test/large",
-        opener=lambda *_args, **_kwargs: Tracked(),
-        resolver=_resolver({"public.test": "93.184.216.34"}),
-        max_bytes=1000,
-    )
-
-    assert document.status == "error"
-    assert "太大" in document.error
-    assert reads == []
-
-
-def test_fetch_treats_response_header_names_case_insensitively():
-    response = _Response(b"<p>small body</p>")
-    response.headers = {"content-type": "text/html", "content-length": "1001"}
-
-    document = fetch_document(
-        "https://public.test/large",
-        opener=lambda *_args, **_kwargs: response,
-        resolver=_resolver({"public.test": "93.184.216.34"}),
-        max_bytes=1000,
-    )
-
-    assert document.status == "error"
-    assert "太大" in document.error
-
-
-def test_fetch_keeps_injected_opener_seam_for_integrators():
-    calls = []
-
-    def fake_urlopen(request, timeout):
-        calls.append((request.full_url, timeout))
-        return _Response("<html><body><p>公开正文</p></body></html>".encode())
-
-    document = fetch_document(
-        "https://public.test/seam",
-        opener=fake_urlopen,
-        resolver=_resolver({"public.test": "93.184.216.34"}),
-    )
-
-    assert document.status == "success"
-    assert calls and calls[0][0] == "https://public.test/seam"
-
-
-def test_validate_urls_can_apply_injected_dns_gate_before_fetch():
-    result = validate_urls(
-        ["https://public.test/a", "https://private.test/b"],
-        resolver=_resolver({"public.test": "93.184.216.34", "private.test": "10.0.0.8"}),
-    )
-
-    assert result.urls == ("https://public.test/a",)
-    assert any("内网" in error for error in result.errors)
-
-
-def test_validate_urls_preserves_brackets_for_public_ipv6_literals():
-    result = validate_urls(["https://[2001:4860:4860::8888]/dns-query#fragment"])
-
-    assert result.urls == ("https://[2001:4860:4860::8888]/dns-query",)
-
-
-def test_fetch_stops_after_redirect_limit_and_keeps_each_hop_public():
-    calls = []
-
-    def opener(request, timeout):
-        calls.append(request.full_url)
-        return _Response(status=302, location="https://public.test/next")
-
-    document = fetch_document(
-        "https://public.test/start",
-        opener=opener,
-        resolver=_resolver({"public.test": "93.184.216.34"}),
-        max_redirects=2,
-    )
-
-    assert document.status == "error"
-    assert "重定向" in document.error
-    assert len(calls) == 3
-
-
-def test_fetch_returns_timeout_when_total_deadline_is_already_exhausted():
-    document = fetch_document(
-        "https://public.test/slow",
-        opener=lambda *_args, **_kwargs: _Response(b"<p>not read</p>"),
-        resolver=_resolver({"public.test": "93.184.216.34"}),
-        total_timeout=0,
-    )
-
-    assert document.status == "error"
-    assert "超时" in document.error
-
-
-def test_fetch_treats_non_positive_connection_timeout_as_timeout():
-    called = False
-
-    def opener(*_args, **_kwargs):
-        nonlocal called
-        called = True
-        return _Response(b"<p>not read</p>")
-
-    document = fetch_document(
-        "https://public.test/slow",
-        opener=opener,
-        resolver=_resolver({"public.test": "93.184.216.34"}),
-        timeout=0,
-    )
-
-    assert document.status == "error"
-    assert "超时" in document.error
-    assert called is False
+    assert all(document.url == "" for document in [*DEMO_DOCUMENTS, *template_documents])
 
 
 def test_ai_client_is_offline_by_default_even_when_a_key_exists(monkeypatch):

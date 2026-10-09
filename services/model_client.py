@@ -138,7 +138,7 @@ class OpenAICompatibleReportClient:
             if document.status != "success":
                 continue
             source_blocks.append(
-                f"[source_index={index}] 标题：{document.title}\n链接：{document.url}\n正文：{document.text[:12000]}"
+                f"[source_index={index}] 标题：{document.title}\n正文：{document.text[:12000]}"
             )
         return (
             f"主题：{topic}\n报告角度：{angle}\n\n"
@@ -183,7 +183,7 @@ class OpenAICompatibleReportClient:
             source_summaries.append(
                 SourceSummary(
                     url=document.url,
-                    title=document.title or "未命名页面",
+                    title=document.title or "未命名资料",
                     summary=summary,
                     date_hint=document.date_hint,
                     status=document.status,
@@ -199,9 +199,9 @@ class OpenAICompatibleReportClient:
                 "模型返回的来源索引存在重复、缺失或越界，相关摘要已回退到原文证据，请人工复核。"
             )
         if failed_indexes_returned:
-            warnings.append("模型为未读取来源返回了摘要，相关内容已丢弃，请人工复核。")
+            warnings.append("模型为不可用资料返回了摘要，相关内容已丢弃，请人工复核。")
         if failed:
-            warnings.append(f"有 {len(failed)} 个来源未读取。")
+            warnings.append(f"有 {len(failed)} 份资料不可用。")
         return Report(
             topic=topic,
             angle=angle,

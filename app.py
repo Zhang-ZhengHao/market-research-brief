@@ -11,38 +11,33 @@ from services.export import (
     report_to_markdown,
     research_project_to_zip,
 )
-from services.fetcher import fetch_document
 from services.model_client import AI_FEATURE_FLAG, OpenAICompatibleReportClient, env_flag
 from services.report import build_report
 from services.sources import build_pasted_sources
-from services.urls import validate_urls
-from services.version import BUILD_SHA
+from services.version import APP_VERSION, BUILD_SHA
 
 
 ANGLE_OPTIONS = ("竞品速览", "研究简报", "内容选题")
-SOURCE_MODE_OPTIONS = ("示例资料", "公开网页", "粘贴正文")
+SOURCE_MODE_OPTIONS = ("示例资料", "粘贴正文")
 TEMPLATE_OPTIONS = tuple(RESEARCH_TEMPLATES)
 
 
 def _render_footer() -> None:
     st.divider()
-    st.caption(f"版本 {BUILD_SHA} · 当前结果只保存在本次页面会话")
+    st.caption(f"版本 v{APP_VERSION} · 构建 {BUILD_SHA} · 当前结果只保存在本次页面会话")
 
 
 def _render_source(source) -> None:
-    if source.status != "success":
-        status = "未读取"
-    else:
-        status = "已载入" if source.source_kind == "pasted" else "已读取"
-    source_kind = {"pasted": "用户粘贴", "demo": "演示资料", "web": "公开网页"}.get(
+    status = "已载入" if source.status == "success" else "不可用"
+    source_kind = {"pasted": "用户粘贴", "demo": "合成示例"}.get(
         source.source_kind, source.source_kind
     )
-    safe_title = html.escape(source.title or "未命名页面")
+    safe_title = html.escape(source.title or "未命名资料")
     st.markdown(f"**{safe_title}**　`{status} · {source_kind}`", unsafe_allow_html=True)
     if source.url:
         if source.source_kind == "pasted":
-            st.caption("链接仅供回看，本次正文来自用户粘贴")
-        st.markdown(f"[打开来源]({html.escape(source.url, quote=True)})")
+            st.caption("用户提供的参考链接；应用未抓取或验证该链接")
+        st.markdown(f"[打开参考链接]({html.escape(source.url, quote=True)})")
     elif source.source_kind == "pasted":
         st.caption("未提供外部链接（用户粘贴资料）")
     else:
@@ -161,15 +156,15 @@ st.markdown(
     f"""
     <section class="hero">
       <h1>Market Research Brief <span style="white-space: nowrap;">(Insight Monitor)</span></h1>
-      <p>把几个公开来源整理成一份带出处的研究简报。适合竞品速览、行业调研和内容选题。</p>
+      <p>把合成示例或粘贴资料整理成一份可复核的研究简报。适合竞品速览、行业调研和内容选题。</p>
     </section>
     """,
     unsafe_allow_html=True,
 )
 
 st.info(
-    "产品只处理你提供的公开网页或粘贴正文，不登录、不绕过付费墙，也不自动搜索全网。"
-    "真实 AI 模式会把提取到的正文发送到你配置的模型服务。"
+    "来源处理默认离线：应用只使用合成示例或你粘贴的正文，参考链接仅作记录，不会被抓取或验证。"
+    "真实 AI 模式会把已载入的正文发送到你配置的模型服务。"
 )
 
 template = st.selectbox(
@@ -200,15 +195,8 @@ with st.form("research_form"):
         ANGLE_OPTIONS,
         index=ANGLE_OPTIONS.index(template.angle) if template.angle in ANGLE_OPTIONS else 0,
     )
-    urls_text = ""
     pasted_entries = []
-    if source_mode == "公开网页":
-        urls_text = st.text_area(
-            "公开网页地址（每行一个，最多 5 个）",
-            placeholder="https://example.com/article-1\nhttps://example.com/article-2",
-            height=130,
-        )
-    elif source_mode == "粘贴正文":
+    if source_mode == "粘贴正文":
         st.caption(
             "网页无法直接读取时，可把 1–5 份正文粘贴到这里；每份最多 12,000 字符，合计最多 40,000 字符，资料会按顺序单独对照。"
         )
@@ -275,34 +263,6 @@ if submitted:
             st.warning("未检测到 OPENAI_API_KEY，已使用演示规则生成报告。")
         elif ai_mode and not ai_server_enabled:
             st.warning(f"真实 AI 功能未开启（请由部署者设置 {AI_FEATURE_FLAG}=1），已使用演示规则生成报告。")
-    elif source_mode == "公开网页":
-        validation = validate_urls(urls_text.splitlines())
-        for duplicate in validation.duplicates:
-            st.info(f"已合并重复地址：{duplicate}")
-        for error in validation.errors:
-            st.error(error)
-        if validation.limit_exceeded:
-            st.warning("本次没有提交任何地址；请删减到 5 个以内后再生成报告。")
-            st.stop()
-        if not validation.urls:
-            st.warning("请至少提供一个有效的公开网页地址。")
-            st.stop()
-        documents = []
-        progress = st.progress(0, text="正在读取公开网页…")
-        for index, url in enumerate(validation.urls, start=1):
-            documents.append(fetch_document(url))
-            progress.progress(index / len(validation.urls), text=f"已处理 {index}/{len(validation.urls)} 个来源")
-        mode = (
-            "真实 AI"
-            if ai_mode
-            and ai_server_enabled
-            and os.getenv("OPENAI_API_KEY", "").strip()
-            else "演示规则"
-        )
-        if ai_mode and not os.getenv("OPENAI_API_KEY", "").strip():
-            st.warning("未检测到 OPENAI_API_KEY，已使用演示规则生成报告。")
-        elif ai_mode and not ai_server_enabled:
-            st.warning(f"真实 AI 功能未开启（请由部署者设置 {AI_FEATURE_FLAG}=1），已使用演示规则生成报告。")
     else:
         try:
             documents = build_pasted_sources(pasted_entries)
@@ -316,7 +276,7 @@ if submitted:
             and os.getenv("OPENAI_API_KEY", "").strip()
             else "演示规则"
         )
-        st.success(f"已载入 {len(documents)} 份手工粘贴资料；本次会话不会发起网页抓取。")
+        st.success(f"已载入 {len(documents)} 份手工粘贴资料；应用不会访问其中的参考链接。")
         if ai_mode and not os.getenv("OPENAI_API_KEY", "").strip():
             st.warning("未检测到 OPENAI_API_KEY，已使用演示规则生成报告。")
         elif ai_mode and not ai_server_enabled:

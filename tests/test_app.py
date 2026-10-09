@@ -23,7 +23,7 @@ def test_demo_entry_is_generic_and_not_football(monkeypatch):
     app = AppTest.from_file(Path(__file__).parents[1] / "app.py").run()
 
     source_options = list(app.radio[0].options)
-    assert "示例资料" in source_options
+    assert source_options == ["示例资料", "粘贴正文"]
     assert "足球演示数据" not in source_options
     assert "宠物" in app.text_input[0].value
     assert all("足球" not in DEMO_TOPIC and "足球" not in document.text for document in DEMO_DOCUMENTS)
