@@ -39,9 +39,9 @@ def _render_source(source) -> None:
             st.caption("用户提供的参考链接；应用未抓取或验证该链接")
         st.markdown(f"[打开参考链接]({html.escape(source.url, quote=True)})")
     elif source.source_kind == "pasted":
-        st.caption("未提供外部链接（用户粘贴资料）")
+        st.caption("未提供参考链接（用户粘贴资料）")
     else:
-        st.caption("未提供外部链接")
+        st.caption("合成示例不含外部链接")
     if source.date_hint:
         st.caption(f"日期线索：{source.date_hint}")
     if source.summary:
@@ -143,8 +143,9 @@ st.markdown(
     @media (max-width: 700px) {
       .block-container { padding: 1rem .8rem 2rem; }
       .hero { padding: 1rem; }
+      .hero h1 { font-size: 1.85rem; }
       button[data-testid^="stBaseButton-"], [data-testid="stDownloadButton"] button {
-        min-height: 44px !important; height: 44px !important;
+        min-height: 44px !important;
       }
     }
     </style>
@@ -184,7 +185,7 @@ if source_mode == "粘贴正文":
             max_value=5,
             value=1,
             step=1,
-            help="每份资料会单独展示标题、摘要、证据片段和来源链接。",
+            help="每份资料会单独展示标题、摘要、证据片段和可选参考链接。",
         )
     )
 
@@ -198,12 +199,16 @@ with st.form("research_form"):
     pasted_entries = []
     if source_mode == "粘贴正文":
         st.caption(
-            "网页无法直接读取时，可把 1–5 份正文粘贴到这里；每份最多 12,000 字符，合计最多 40,000 字符，资料会按顺序单独对照。"
+            "粘贴 1–5 份正文；每份最多 12,000 字符，合计最多 40,000 字符。参考链接仅作记录，应用不会访问。"
         )
         for index in range(pasted_source_count):
             with st.expander(f"资料 {index + 1}", expanded=index == 0):
                 title_label = "资料标题（可选）" if index == 0 else f"资料 {index + 1} 标题（可选）"
-                url_label = "来源链接（可选）" if index == 0 else f"资料 {index + 1} 来源链接（可选）"
+                url_label = (
+                    "参考链接（可选，应用不会访问）"
+                    if index == 0
+                    else f"资料 {index + 1} 参考链接（可选，应用不会访问）"
+                )
                 text_label = (
                     "资料正文（必填，最多 12,000 字符）"
                     if index == 0

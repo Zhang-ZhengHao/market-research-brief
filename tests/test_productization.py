@@ -37,6 +37,22 @@ def test_synthetic_demo_sources_do_not_offer_placeholder_external_links():
     assert all(document.url == "" for document in [*DEMO_DOCUMENTS, *template_documents])
 
 
+def test_release_docs_match_the_paste_only_network_boundary():
+    root = Path(__file__).parents[1]
+    english = (root / "README.md").read_text(encoding="utf-8")
+    chinese = (root / "README.zh-CN.md").read_text(encoding="utf-8")
+    security = (root / "SECURITY.md").read_text(encoding="utf-8")
+    changelog = (root / "CHANGELOG.md").read_text(encoding="utf-8") if (root / "CHANGELOG.md").exists() else ""
+
+    assert "Exactly two input modes" in english
+    assert "仅提供两种资料模式" in chinese
+    assert "不读取网页" in security
+    assert "## [0.1.0] - 2026-10-09" in changelog
+    for document in (english, chinese, security):
+        assert "services/fetcher.py" not in document
+        assert "ssrf-protection" not in document.lower()
+
+
 def test_ai_client_is_offline_by_default_even_when_a_key_exists(monkeypatch):
     monkeypatch.setenv("OPENAI_API_KEY", "test-key")
     monkeypatch.delenv("INSIGHT_MONITOR_AI_ENABLED", raising=False)

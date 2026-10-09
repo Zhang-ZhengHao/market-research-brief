@@ -2,108 +2,98 @@
 
 **English** | [简体中文](README.zh-CN.md)
 
-A small Streamlit application that turns a limited set of user-supplied sources into a reviewable research brief. It is designed as a portfolio demonstration for competitor snapshots, industry updates, and content research—not as an autonomous crawler or a fact-checking service.
+[![Verify](https://github.com/Zhang-ZhengHao/market-research-brief/actions/workflows/verify.yml/badge.svg)](https://github.com/Zhang-ZhengHao/market-research-brief/actions/workflows/verify.yml)
 
-![Market Research Brief interface](screenshots/overview.png)
+Market Research Brief turns up to five user-pasted documents into a reviewable research brief. It preserves source order and verbatim evidence excerpts, then exports Markdown, JSON, or a ZIP handoff package. The bundled examples are synthetic. This project is a portfolio demonstration, not a crawler, fact-checking service, or production research system.
 
-## Features
+![Paste-only Market Research Brief interface](screenshots/overview.png)
 
-- Uses one of three source modes: clearly labelled synthetic examples, up to five public web pages, or up to five pasted documents.
-- Generates a deterministic report by default, with an executive summary, comparison points, changes, suggested actions, and source-level status.
-- Keeps each successful source aligned with its title, URL when supplied, date hint, summary, and a bounded verbatim evidence excerpt.
-- Exports the report as Markdown or JSON, or as a ZIP research package containing `project.json` and `report.md`.
-- Offers an optional OpenAI-compatible summarization path that is disabled unless both a feature flag and a server-side API key are configured.
-- Falls back to the deterministic report when the optional model request fails.
+## What it demonstrates
 
-The application does not search the web, sign in to websites, bypass paywalls, schedule jobs, send messages, or maintain a server-side research history.
+- Exactly two input modes: clearly labelled synthetic examples and user-pasted text.
+- Optional reference links are user-supplied metadata. The app does not fetch or verify them.
+- Deterministic processing requires no API key or model request.
+- Findings remain aligned with source titles, input order, and bounded verbatim evidence excerpts.
+- Markdown, JSON, and ZIP exports; the ZIP contains project.json and report.md.
+- Results remain in the active Streamlit session unless the user downloads them.
+- An optional OpenAI-compatible summarizer is feature-gated, server-configured, and backed by deterministic fallback.
 
-## Evidence and traceability
+## Five-minute review
 
-The report is grounded in the material supplied during the current session:
+1. Choose a synthetic template or switch to pasted text.
+2. For pasted text, add one to five documents in the order they should be compared.
+3. Optionally store an HTTP(S) reference link. It is not opened, resolved, or verified by the application.
+4. Generate the report and inspect each source title, summary, date hint, and verbatim evidence excerpt.
+5. Download Markdown, JSON, or the ZIP research package.
 
-- For a public page, the application retains the normalized source URL and an excerpt copied directly from the extracted page text.
-- For pasted material, the pasted text is the analyzed source. An optional URL is retained only as a reference link.
-- A failed source is marked as unread and receives no generated evidence excerpt.
-- Built-in demo sources are synthetic and explicitly labelled; they are not presented as current market facts.
+Built-in templates are synthetic and are never presented as current market facts. Generated summaries may be incomplete or wrong. Verify dates, numbers, quotations, and business conclusions against the pasted source text before publication or decision-making.
 
-Repository evidence for these behaviors is available in:
+## Evidence map
 
-| Claim | Implementation or test evidence |
+| Claim | Implementation and tests |
 | --- | --- |
-| Source limits and pasted-source ordering | `services/sources.py`, `tests/test_sources.py` |
-| Public URL validation and redirect checks | `services/urls.py`, `services/fetcher.py`, `tests/test_urls.py`, `tests/test_productization.py` |
-| Verbatim evidence excerpts and failed-source handling | `services/report.py`, `tests/test_report.py` |
-| Model source-index alignment and safe fallback | `services/model_client.py`, `tests/test_model_client.py` |
-| Markdown, JSON, and ZIP exports | `services/export.py`, `tests/test_export.py` |
-| Five-source synthetic calibration case | `docs/calibration/2026-09-22-pet-supplies-competitor-case.md` |
+| Pasted-source ordering and 1–5 document limits | services/sources.py, tests/test_sources.py |
+| Inert HTTP(S) reference metadata with no DNS or page request | services/reference_links.py, tests/test_sources.py, tests/test_productization.py |
+| Verbatim evidence and deterministic fallback | services/report.py, tests/test_report.py |
+| Model source-index alignment and reference-link minimization | services/model_client.py, tests/test_model_client.py |
+| Markdown, JSON, and deterministic ZIP exports | services/export.py, tests/test_export.py |
+| Two-mode Streamlit workflow and version identity | app.py, tests/test_app.py, tests/test_version.py |
 
-These checks establish source alignment and application behavior; they do not establish that a source is authoritative or that a generated conclusion is factually correct.
+These checks establish application behavior and traceability. They do not establish that supplied material is authoritative or that a conclusion is factually correct.
 
-## Technology stack
+## Source and network boundary
 
-- Python 3.10+
-- Streamlit 1.64.0
-- Python standard-library HTTP, HTML parsing, IP address, JSON, and ZIP modules
-- pytest 8.x for automated tests
-- Optional OpenAI-compatible Chat Completions endpoint, called without an additional SDK
+Source ingestion does not resolve hostnames, open sockets, or request reference links. Reference links accept syntactically valid HTTP(S) URLs without embedded credentials, discard fragments, and remain unverified metadata. A link can therefore point anywhere; treat it as untrusted before opening it in a browser.
+
+Default deterministic mode makes no model request. If optional model summarization is explicitly enabled, accepted source titles and text are sent to the configured provider; reference links are not included in the prompt. Review that provider's cost, retention, residency, and privacy terms first.
+
+Limits are enforced before report generation:
+
+- one to five pasted documents;
+- at most 12,000 characters per document;
+- at most 40,000 pasted characters per report.
 
 ## Quick start
 
-From the repository root:
+Python 3.10 or newer:
 
-```bash
-python3 -m venv .venv
-. .venv/bin/activate
-python -m pip install -r requirements-dev.txt
-python -m streamlit run app.py
-```
+    python3 -m venv .venv
+    . .venv/bin/activate
+    python3 -m pip install -r requirements-dev.txt
+    python3 -m streamlit run app.py
 
-On Windows PowerShell, activate the environment with `.venv\Scripts\Activate.ps1`.
+The managed start command reads its port from the environment and binds to all interfaces:
 
-The managed start script requires a port and binds to all interfaces:
+    PORT=8501 bash start.sh
 
-```bash
-PORT=8501 bash start.sh
-```
-
-Only expose that development-style process on a trusted host. A production deployment should place it behind an authenticated, TLS-terminating reverse proxy and appropriate network controls.
+Only expose this development-style process on a trusted host. A production deployment should place it behind authentication, TLS termination, and appropriate platform controls.
 
 ### Optional model mode
 
-Deterministic mode requires no API key. To allow a user to select the optional model path, configure the server process explicitly:
+Deterministic mode requires no key. The optional model path is unavailable unless the deployment explicitly enables it and supplies a server-side key:
 
-```bash
-export INSIGHT_MONITOR_AI_ENABLED=1
-export OPENAI_API_KEY="replace-with-a-server-side-key"
-export OPENAI_BASE_URL="https://api.openai.com/v1"  # optional
-export OPENAI_MODEL="gpt-4o-mini"                    # optional
-```
+    export INSIGHT_MONITOR_AI_ENABLED=1
+    export OPENAI_API_KEY="replace-with-a-server-side-key"
+    export OPENAI_BASE_URL="https://api.openai.com/v1"  # optional
+    export OPENAI_MODEL="gpt-4o-mini"                    # optional
 
-Do not commit credentials. When model mode is used, successful source text is sent to the configured provider; review its cost, retention, residency, and cross-border data policies first.
+Do not commit credentials. The key is read by the server process and is not rendered in the page.
 
-## Tests
+## Verification
 
-The verification workflow runs on Python 3.10 and 3.12. The same checks can be run locally after installing `requirements-dev.txt`:
+The GitHub Actions matrix runs on Python 3.10 and 3.12. Run the same checks locally after installing development dependencies:
 
-```bash
-PYTHONPATH=. python -m pytest -q tests
-python -m compileall -q app.py services tests
-python -m pip check
-```
+    PYTHONPATH=. python3 -m pytest -q tests
+    python3 -m compileall -q app.py services tests
+    python3 -m pip check
 
-## URL and network security boundary
-
-The public-page path accepts only HTTP and HTTPS URLs. It rejects embedded credentials and hosts or resolved addresses classified as local, private, loopback, link-local, reserved, multicast, or unspecified. DNS and destination checks are repeated before each redirect hop. Fetching is also bounded to five URLs, four redirects, a 2 MB response, a 12-second connection timeout, a 20-second overall timeout, HTML content, and 12,000 extracted characters per source.
-
-These are application-level safeguards, not a hardened network sandbox. They do not replace deployment-level egress rules, metadata-service blocking, DNS controls, proxy policy, rate limiting, or abuse monitoring. Deployments handling untrusted users should enforce those controls outside the process as well.
-
-Default deterministic mode makes no model request. Public-page mode still connects to the URLs supplied by the user. If optional model mode is enabled, the application can send at most five sources and 40,000 source characters to the configured OpenAI-compatible endpoint.
+See [CHANGELOG.md](CHANGELOG.md) for release history.
 
 ## Production boundary
 
-This repository is a customer-demo and portfolio implementation. It does not include authentication or authorization, tenant isolation, persistent storage, audit logs, background jobs, quotas, billing, high availability, backups, production observability, or a factual-accuracy guarantee. Session results exist only in the active Streamlit session unless the user downloads them.
+This repository is a customer-demo and portfolio implementation. It does not include authentication, authorization, tenant isolation, persistent storage, audit logs, background jobs, quotas, billing, high availability, backups, production observability, or a factual-accuracy guarantee.
 
-Before using it with customer data, add the controls appropriate to the deployment, obtain permission to process the material, remove sensitive data, and require a person to verify dates, numbers, quotations, and business conclusions against the original sources.
+Before using customer material, obtain permission, remove sensitive data, review the optional model provider's policies, and require a person to verify the report against the pasted source text.
 
 ## License
 

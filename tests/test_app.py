@@ -16,6 +16,9 @@ def test_product_title_matches_repository_manifest():
     assert 'name = "Market Research Brief (Insight Monitor)"' in (
         root / "app.toml"
     ).read_text(encoding="utf-8")
+    assert "--client.toolbarMode=minimal" in (root / "start.sh").read_text(
+        encoding="utf-8"
+    )
 
 
 def test_demo_entry_is_generic_and_not_football(monkeypatch):
@@ -77,3 +80,13 @@ def test_pasted_source_count_renders_three_ordered_sources(monkeypatch):
     assert not app.exception
     assert any("已载入 3 份" in item.value for item in app.success)
     assert any("按资料顺序对照，共 3 份" in item.label for item in app.expander)
+
+
+def test_pasted_mode_labels_reference_links_as_inert_metadata(monkeypatch):
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    app = AppTest.from_file(Path(__file__).parents[1] / "app.py").run()
+
+    app.radio[0].set_value("粘贴正文").run()
+
+    assert any("参考链接（可选，应用不会访问）" == item.label for item in app.text_input)
+    assert all("网页无法直接读取" not in item.value for item in app.caption)
