@@ -18,4 +18,5 @@ exec python3 -m streamlit run app.py \
   --server.port="${PORT}" \
   --server.headless=true \
   --server.fileWatcherType=none \
+  --client.toolbarMode=minimal \
   --browser.gatherUsageStats=false

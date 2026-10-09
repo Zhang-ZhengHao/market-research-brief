@@ -7,7 +7,7 @@
 
 - 主题：`宠物用品竞品周报`
 - 报告角度：`研究简报`
-- 来源模式：手工粘贴，5 份资料，均为合成公开资料，不访问外部网络。
+- 来源模式：手工粘贴，5 份资料，均为合成资料；参考链接不触发外部访问。
 
 | 顺序 | 标题 | 资料正文要点 |
 |---:|---|---|
@@ -43,7 +43,7 @@
     "S4 售后摘要"
   ],
   "failed_source_summary": "",
-  "failed_source_error": "模拟抓取失败",
+  "failed_source_error": "模拟资料不可用",
   "prompt_excludes_failed_text": true,
   "markdown_source_headings": 5,
   "status": "PASS"
@@ -60,7 +60,7 @@
 {
   "source_order": ["A｜官方公告", "B｜行业媒体", "C｜用户社区", "D｜开发者文档", "E｜价格页"],
   "summaries_after_alignment": ["A 摘要", "B 摘要", "", "D 摘要", "E 摘要"],
-  "failed_middle_source": {"summary": "", "evidence": "", "error": "抓取超时"},
+  "failed_middle_source": {"summary": "", "evidence": "", "error": "资料不可用"},
   "prompt_indexes": [0, 1, 3, 4],
   "failed_text_excluded": true,
   "fallback_mode": "演示规则（AI失败回退）",
@@ -82,7 +82,7 @@
 {
   "status": "PASS",
   "sources": 5,
-  "success_message": "已载入 5 份手工粘贴资料；本次会话不会发起网页抓取。",
+  "success_message": "已载入 5 份手工粘贴资料；应用不会访问其中的参考链接。",
   "exceptions": 0
 }
 ```

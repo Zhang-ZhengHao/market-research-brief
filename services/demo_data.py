@@ -10,7 +10,7 @@ DEMO_TOPIC = "宠物用品竞品变化"
 
 DEMO_DOCUMENTS = [
     SourceDocument(
-        url="https://example.com/pet-brand-a/news",
+        url="",
         title="演示来源 A｜宠物用品品牌动态（示例资料）",
         date_hint="2026-09-18",
         text=(
@@ -20,7 +20,7 @@ DEMO_DOCUMENTS = [
         source_kind="demo",
     ),
     SourceDocument(
-        url="https://example.com/pet-market/observation",
+        url="",
         title="演示来源 B｜宠物用品市场观察（示例资料）",
         date_hint="2026-09-17",
         text=(
@@ -30,7 +30,7 @@ DEMO_DOCUMENTS = [
         source_kind="demo",
     ),
     SourceDocument(
-        url="https://example.com/pet-reviews/topic",
+        url="",
         title="演示来源 C｜宠物用品用户反馈专题（示例资料）",
         date_hint="2026-09-15",
         text=(

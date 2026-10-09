@@ -47,7 +47,7 @@ def evidence_excerpt(text: str, limit: int = EVIDENCE_MAX_CHARS) -> str:
 
 def _angle_action(angle: str, topic: str) -> str:
     if angle == "内容选题":
-        return f"围绕“{topic}”做一篇对比型内容，并在发布前回看每份来源原文。"
+        return f"围绕“{topic}”做一篇对比型内容，并在发布前回看每份粘贴原文。"
     if angle == "研究简报":
         return "把来源按日期和可信度再核验一次，再将结论交给相关负责人。"
     return "把共同点作为当前判断，把差异和未证实信息列入人工复核清单。"
@@ -86,7 +86,7 @@ def _build_deterministic(topic: str, angle: str, documents: list[SourceDocument]
     summaries = [
         SourceSummary(
             url=document.url,
-            title=document.title or "未命名页面",
+            title=document.title or "未命名资料",
             summary=_first_sentences(document.text),
             date_hint=document.date_hint,
             status=document.status,
@@ -99,12 +99,12 @@ def _build_deterministic(topic: str, angle: str, documents: list[SourceDocument]
 
     if successful:
         executive = [
-            f"本次围绕“{topic}”处理了 {len(successful)} 个成功来源。",
-            "摘要来自用户提供的资料正文，重要判断仍需打开原文或回看粘贴内容人工复核。",
+            f"本次围绕“{topic}”处理了 {len(successful)} 份可用资料。",
+            "摘要来自已载入的资料正文；参考链接由用户提供，应用不会抓取或验证。",
         ]
         common = [
-            f"成功来源都与“{topic}”相关，适合先建立信息框架。",
-            "各来源均保留了来源信息或原文证据，便于后续核验和补充。",
+            f"可用资料都与“{topic}”相关，适合先建立信息框架。",
+            "每份资料均保留原文证据及可选参考信息，便于后续人工核验和补充。",
         ]
         differences = [
             "不同来源的叙述重点、发布时间和细节深度可能不同，不能直接视为同一事实。",
@@ -115,17 +115,17 @@ def _build_deterministic(topic: str, angle: str, documents: list[SourceDocument]
         ]
         actions = [_angle_action(angle, topic)]
     else:
-        executive = ["没有成功提取到可分析的资料正文，请补充公开地址或直接粘贴正文。"]
+        executive = ["没有可分析的资料正文，请先粘贴至少一份正文。"]
         common = []
         differences = []
         changes = []
-        actions = ["先补充一个可公开访问的地址，或直接粘贴正文，再重新生成报告。"]
+        actions = ["先粘贴一份资料正文，再重新生成报告。"]
 
     warnings = []
     if mode != "真实 AI":
         warnings.append("当前为演示/规则汇总，不代表实时事实，也不保证结论准确。")
     if failed:
-        warnings.append(f"有 {len(failed)} 个来源未能读取：" + "；".join(document.error for document in failed))
+        warnings.append(f"有 {len(failed)} 份资料不可用：" + "；".join(document.error for document in failed))
 
     return Report(
         topic=topic,
