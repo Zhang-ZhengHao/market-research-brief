@@ -1,6 +1,15 @@
 # Market Research Brief v0.1.0 Paste-only Safety Cut
 
-**Status:** Approved for specification on 2026-10-09; implementation has not started.
+**Status:** Implemented and released as v0.1.0 on 2026-10-09 through
+[PR #1](https://github.com/Zhang-ZhengHao/market-research-brief/pull/1).
+
+**Release evidence:** merge and annotated tag target
+`38e17aa7448c4c93ce3f34b81d90dee532f36d13`; the
+[Python 3.10/3.12 workflow](https://github.com/Zhang-ZhengHao/market-research-brief/actions/runs/37883474695)
+and [CodeQL workflow](https://github.com/Zhang-ZhengHao/market-research-brief/actions/runs/37883473566)
+both completed successfully. The future tense below is retained as the approved
+pre-implementation design record; the release outcome is recorded here rather
+than rewriting the original decision rationale.
 
 ## Context
 

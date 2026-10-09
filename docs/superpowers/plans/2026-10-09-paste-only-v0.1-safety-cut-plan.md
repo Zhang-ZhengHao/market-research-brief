@@ -2,6 +2,10 @@
 
 **Approved design:** `docs/superpowers/specs/2026-10-09-paste-only-v0.1-safety-cut-design.md`
 
+**Status:** Completed on 2026-10-09 and released as
+[v0.1.0](https://github.com/Zhang-ZhengHao/market-research-brief/releases/tag/v0.1.0).
+The imperative steps below are retained as the implementation record.
+
 ## Objective
 
 Ship a reviewable `v0.1.0` that accepts only bundled synthetic examples or
@@ -131,16 +135,25 @@ runtime integration.
 
 ## Acceptance checklist
 
-- [ ] Exactly two source modes: synthetic example and pasted text.
-- [ ] No public-page fetcher, DNS destination validator, redirect loop, or
+- [x] Exactly two source modes: synthetic example and pasted text.
+- [x] No public-page fetcher, DNS destination validator, redirect loop, or
       page-fetch UI remains in the released tree.
-- [ ] Reference links are HTTP(S)-only, credential-free, fragment-free,
+- [x] Reference links are HTTP(S)-only, credential-free, fragment-free,
       syntactic metadata and cause no network access.
-- [ ] Five-source and character limits remain enforced atomically.
-- [ ] Deterministic report generation and Markdown/JSON/ZIP export still work.
-- [ ] Optional model mode remains off by default with an explicit privacy note.
-- [ ] Footer displays `v0.1.0` and build SHA.
-- [ ] English/Chinese docs, screenshot, GitHub metadata, Release, and profile
+- [x] Five-source and character limits remain enforced atomically.
+- [x] Deterministic report generation and Markdown/JSON/ZIP export still work.
+- [x] Optional model mode remains off by default with an explicit privacy note.
+- [x] Footer displays `v0.1.0` and build SHA.
+- [x] English/Chinese docs, screenshot, GitHub metadata, Release, and profile
       entry tell the same story.
-- [ ] Local suite and remote Python 3.10/3.12 checks pass at the released commit.
+- [x] Local suite and remote Python 3.10/3.12 checks pass at the released commit.
 
+## Completion evidence
+
+- Review: [PR #1](https://github.com/Zhang-ZhengHao/market-research-brief/pull/1)
+- Release: [v0.1.0](https://github.com/Zhang-ZhengHao/market-research-brief/releases/tag/v0.1.0)
+- Release commit: `38e17aa7448c4c93ce3f34b81d90dee532f36d13`
+- Verify: [Python 3.10 and 3.12](https://github.com/Zhang-ZhengHao/market-research-brief/actions/runs/37883474695)
+- Security analysis: [CodeQL for Python and Actions](https://github.com/Zhang-ZhengHao/market-research-brief/actions/runs/37883473566)
+- Profile synchronization:
+  [`4ca378e`](https://github.com/Zhang-ZhengHao/Zhang-ZhengHao/commit/4ca378ebc2a3185a8587c8e371e501a6ac7ed100)
