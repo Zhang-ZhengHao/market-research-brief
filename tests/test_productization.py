@@ -53,6 +53,28 @@ def test_release_docs_match_the_paste_only_network_boundary():
         assert "ssrf-protection" not in document.lower()
 
 
+def test_public_delivery_docs_record_the_completed_release():
+    root = Path(__file__).parents[1]
+    design = (
+        root
+        / "docs"
+        / "superpowers"
+        / "specs"
+        / "2026-10-09-paste-only-v0.1-safety-cut-design.md"
+    ).read_text(encoding="utf-8")
+    plan = (
+        root
+        / "docs"
+        / "superpowers"
+        / "plans"
+        / "2026-10-09-paste-only-v0.1-safety-cut-plan.md"
+    ).read_text(encoding="utf-8")
+
+    assert "Implemented and released as v0.1.0" in design
+    assert "Completed on 2026-10-09" in plan
+    assert "- [ ]" not in plan
+
+
 def test_ai_client_is_offline_by_default_even_when_a_key_exists(monkeypatch):
     monkeypatch.setenv("OPENAI_API_KEY", "test-key")
     monkeypatch.delenv("INSIGHT_MONITOR_AI_ENABLED", raising=False)
