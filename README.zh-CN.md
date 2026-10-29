@@ -53,7 +53,7 @@ Market Research Brief 可将最多 5 份用户粘贴资料整理成一份可复�
 
 ## 本地运行
 
-需要 Python 3.10 或更高版本：
+需要 Python 3.11 或更高版本：
 
     python3 -m venv .venv
     . .venv/bin/activate
@@ -79,7 +79,7 @@ Market Research Brief 可将最多 5 份用户粘贴资料整理成一份可复�
 
 ## 验证
 
-GitHub Actions 使用 Python 3.10 和 3.12。安装开发依赖后可在本地执行同样检查：
+GitHub Actions 使用 Python 3.11 和 3.12。安装开发依赖后可在本地执行同样检查：
 
     PYTHONPATH=. python3 -m pytest -q tests
     python3 -m compileall -q app.py services tests

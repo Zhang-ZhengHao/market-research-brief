@@ -55,7 +55,7 @@ Limits are enforced before report generation:
 
 ## Quick start
 
-Python 3.10 or newer:
+Python 3.11 or newer:
 
     python3 -m venv .venv
     . .venv/bin/activate
@@ -81,7 +81,7 @@ Do not commit credentials. The key is read by the server process and is not rend
 
 ## Verification
 
-The GitHub Actions matrix runs on Python 3.10 and 3.12. Run the same checks locally after installing development dependencies:
+The GitHub Actions matrix runs on Python 3.11 and 3.12. Run the same checks locally after installing development dependencies:
 
     PYTHONPATH=. python3 -m pytest -q tests
     python3 -m compileall -q app.py services tests

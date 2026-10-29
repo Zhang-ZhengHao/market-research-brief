@@ -7,6 +7,7 @@
 | 依赖 | 许可证 | 项目 |
 | --- | --- | --- |
 | Streamlit | Apache License 2.0 | https://github.com/streamlit/streamlit |
+| Pillow | MIT-CMU | https://github.com/python-pillow/Pillow |
 | pytest（仅开发测试） | MIT License | https://github.com/pytest-dev/pytest |
 
 Streamlit 的传递依赖（包括 requests、pandas、numpy、tornado 等）可能随版本变化；发布构建应依据实际锁定环境生成完整清单。未复制第三方品牌、字体、图片或示例素材；example.com 地址和模板正文均为合成演示数据。
