@@ -95,6 +95,12 @@ This repository is a customer-demo and portfolio implementation. It does not inc
 
 Before using customer material, obtain permission, remove sensitive data, review the optional model provider's policies, and require a person to verify the report against the pasted source text.
 
+## Project inquiries
+
+For a scoped adaptation of this demo, see [current services and project inquiries](https://github.com/Zhang-ZhengHao#work-with-me--项目合作).
+
+The linked GitHub inquiry is public and requires sign-in. Use fictional examples; discuss confidential details and pricing through the freelance platform where you found the project.
+
 ## License
 
 Released under the MIT License. See [LICENSE](LICENSE), [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md), and [SECURITY.md](SECURITY.md).

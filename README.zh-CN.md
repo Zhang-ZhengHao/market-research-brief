@@ -93,6 +93,12 @@ GitHub Actions 使用 Python 3.10 和 3.12。安装开发依赖后可在本地�
 
 使用客户资料前，应取得处理授权、完成脱敏、核对可选模型服务政策，并要求人工根据粘贴原文复核报告。
 
+## 项目咨询
+
+如需按你的工作流程做小范围定制，请从[当前服务与项目咨询](https://github.com/Zhang-ZhengHao#work-with-me--项目合作)开始。
+
+GitHub 咨询需要登录，提交后内容公开；请只使用虚构场景。私密业务细节、范围和报价在原接单平台确认。
+
 ## License
 
 本项目采用 MIT License，见 [LICENSE](LICENSE)、[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) 和 [SECURITY.md](SECURITY.md)。
