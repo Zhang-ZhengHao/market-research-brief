@@ -48,10 +48,11 @@ def report_to_markdown(report: Report) -> str:
         source_kind = {"pasted": "用户粘贴", "demo": "合成示例"}.get(
             source.source_kind, source.source_kind
         )
+        no_link_kind = "合成示例" if source.source_kind == "demo" else "手工粘贴资料"
         link_line = (
             f"- 参考链接（用户提供，应用未抓取或验证）：{source.url}"
             if source.url
-            else "- 参考链接：未提供（手工粘贴资料）"
+            else f"- 参考链接：未提供（{no_link_kind}）"
         )
         evidence = " ".join((source.evidence or "").splitlines())
         lines.extend(

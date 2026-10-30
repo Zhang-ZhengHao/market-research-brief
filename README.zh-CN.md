@@ -8,6 +8,8 @@ Market Research Brief 可将最多 5 份用户粘贴资料整理成一份可复�
 
 ![仅粘贴资料版操作界面](screenshots/overview.png)
 
+可直接查看[合成示例报告](examples/synthetic-brief.md)，它由默认规则模式使用三份内置演示资料导出。
+
 ## 能力与证据
 
 - 仅提供两种资料模式：明确标注的合成示例和用户粘贴正文。

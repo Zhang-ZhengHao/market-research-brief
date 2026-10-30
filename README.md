@@ -8,6 +8,8 @@ Market Research Brief turns up to five user-pasted documents into a reviewable r
 
 ![Paste-only Market Research Brief interface](screenshots/overview.png)
 
+Preview the [synthetic example report (Chinese)](examples/synthetic-brief.md) exported from the three bundled demo sources with the offline rules.
+
 ## What it demonstrates
 
 - Exactly two input modes: clearly labelled synthetic examples and user-pasted text.

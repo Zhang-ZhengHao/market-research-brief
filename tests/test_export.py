@@ -42,3 +42,16 @@ def test_export_does_not_fake_a_link_for_pasted_source_and_keeps_special_text():
     assert "[打开来源]" not in markdown
     assert payload["sources"][0]["source_kind"] == "pasted"
     assert "第一行 <原文>。" in payload["sources"][0]["evidence"]
+
+
+def test_export_labels_synthetic_sources_without_reference_links():
+    report = build_report(
+        "合成演示",
+        "竞品速览",
+        [SourceDocument("", "合成来源", "这是合成演示资料。", source_kind="demo")],
+    )
+
+    markdown = report_to_markdown(report)
+
+    assert "参考链接：未提供（合成示例）" in markdown
+    assert "手工粘贴资料" not in markdown
