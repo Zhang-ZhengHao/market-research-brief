@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from streamlit.testing.v1 import AppTest
-from services.demo_data import DEMO_DOCUMENTS, DEMO_TOPIC
+from services.demo_data import DEMO_DOCUMENTS, DEMO_TOPIC, get_template
 
 
 def test_product_title_matches_repository_manifest():
@@ -42,6 +42,19 @@ def test_generic_demo_entry_still_runs_without_api_key(monkeypatch):
     assert not app.exception
     assert any("已载入 3 个宠物用品竞品合成演示来源" in item.value for item in app.success)
     assert any("宠物" in item.value or "竞品" in item.value for item in app.markdown)
+
+
+def test_industry_template_generates_an_industry_weekly_report(monkeypatch):
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.delenv("INSIGHT_MONITOR_AI_ENABLED", raising=False)
+    app = AppTest.from_file(Path(__file__).parents[1] / "app.py").run()
+
+    app.selectbox[0].select(get_template("industry_weekly")).run()
+    app.button[0].click().run()
+
+    assert not app.exception
+    assert app.session_state["report"].angle == "行业周报"
+    assert app.selectbox[1].value == "行业周报"
 
 
 def test_demo_ai_checkbox_explains_missing_key_instead_of_silently_ignoring(monkeypatch):

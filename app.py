@@ -17,7 +17,7 @@ from services.sources import build_pasted_sources
 from services.version import APP_VERSION, BUILD_SHA
 
 
-ANGLE_OPTIONS = ("竞品速览", "研究简报", "内容选题")
+ANGLE_OPTIONS = ("竞品速览", "研究简报", "内容选题", "行业周报")
 SOURCE_MODE_OPTIONS = ("示例资料", "粘贴正文")
 TEMPLATE_OPTIONS = tuple(RESEARCH_TEMPLATES)
 
