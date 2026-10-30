@@ -66,6 +66,18 @@ Market Research Brief 可将最多 5 份用户粘贴资料整理成一份可复�
 
 该进程仍是开发式演示服务，只应运行在可信主机。正式部署需要补充身份认证、TLS 终止和平台级控制。
 
+### Windows PowerShell
+
+先用 `py -3 --version` 确认 Python 版本不低于 3.11，再在项目目录运行：
+
+```powershell
+py -3 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m streamlit run app.py --server.address 127.0.0.1 --server.port 8501
+```
+
+这些命令直接使用虚拟环境中的 Python，无需激活脚本或修改执行策略。打开 `http://localhost:8501`，即可使用无需 API key 的合成示例。在 PowerShell 中按 `Ctrl+C` 停止服务。
+
 ### 可选模型模式
 
 默认规则模式不需要密钥。真实 AI 只有在服务端同时启用功能开关并配置密钥后才可用：

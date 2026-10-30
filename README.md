@@ -68,6 +68,18 @@ The managed start command reads its port from the environment and binds to all i
 
 Only expose this development-style process on a trusted host. A production deployment should place it behind authentication, TLS termination, and appropriate platform controls.
 
+### Windows PowerShell
+
+Check that `py -3 --version` reports Python 3.11 or newer, then run these commands from the project directory:
+
+```powershell
+py -3 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m streamlit run app.py --server.address 127.0.0.1 --server.port 8501
+```
+
+These commands use the virtual environment directly; activation and execution-policy changes are unnecessary. Open `http://localhost:8501` and use the synthetic examples without an API key. Press `Ctrl+C` in PowerShell to stop the server.
+
 ### Optional model mode
 
 Deterministic mode requires no key. The optional model path is unavailable unless the deployment explicitly enables it and supplies a server-side key:
