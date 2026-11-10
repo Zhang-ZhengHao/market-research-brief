@@ -2,6 +2,26 @@
 
 All notable changes to this project are documented here.
 
+## [0.1.1] - 2026-11-10
+
+### Added
+
+- A synthetic sample brief (`examples/synthetic-brief.md`) showing the exported output format.
+- A Windows quick start in the English and Chinese READMEs.
+- A bilingual public project-inquiry entry in both READMEs.
+
+### Changed
+
+- The industry weekly template now uses the intended report angle.
+
+### Fixed
+
+- Exports are now explicitly labeled as synthetic demonstration output.
+
+### Security
+
+- The runtime now requires Python 3.11 and a patched Pillow release.
+
 ## [0.1.0] - 2026-10-09
 
 ### Added

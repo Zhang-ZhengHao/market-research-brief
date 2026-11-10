@@ -5,7 +5,7 @@ from __future__ import annotations
 import os
 
 
-APP_VERSION = "0.1.0"
+APP_VERSION = "0.1.1"
 
 
 def normalize_build_sha(value: object) -> str:
